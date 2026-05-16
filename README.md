@@ -6,6 +6,8 @@
 - 接口自动化：生成 Requests + Pytest 或 Node.js 内置测试脚本
 - 脚本资产：生成后的脚本自动保存到 `generated/`
 - 语法检查：Python 使用 `py_compile`，JavaScript 使用 `node --check`
+- 在线执行：执行完成后自动生成 HTML/JSON 可视化报告到 `reports/`
+- Jenkins 集成：内置 `Jenkinsfile`，支持定时触发和归档报告
 
 ## 启动
 
@@ -59,6 +61,44 @@ JavaScript 接口自动化：
 ```bash
 node --test generated/xxx.test.js
 ```
+
+## 可视化报告
+
+在页面点击“执行脚本”后，平台会生成：
+
+```text
+reports/run_xxx.html
+reports/run_xxx.json
+```
+
+也可以在命令行批量执行 `generated/` 下的脚本：
+
+```bash
+npm run ci:test
+```
+
+批量执行会生成：
+
+```text
+reports/jenkins_xxx.html
+reports/jenkins_xxx.json
+```
+
+## Jenkins 定时触发
+
+仓库根目录已包含 `Jenkinsfile`，默认每天定时执行一次：
+
+```groovy
+cron('H 2 * * *')
+```
+
+Jenkins 任务建议配置：
+
+- Pipeline from SCM
+- SCM URL: `https://github.com/MarinAark/InterfaceAutomationPlatform.git`
+- Script Path: `Jenkinsfile`
+
+执行后会归档 `reports/*.html` 和 `reports/*.json`。如果安装了 Jenkins HTML Publisher 插件，会展示 `Automation Test Report`。
 
 ## 后续可扩展方向
 

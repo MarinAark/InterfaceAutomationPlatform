@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "node server.mjs",
-    "start": "node server.mjs"
+    "start": "node server.mjs",
+    "ci:test": "node scripts/run-generated.mjs"
   },
   "engines": {
     "node": ">=20"

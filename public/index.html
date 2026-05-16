@@ -110,8 +110,14 @@
 
           <section class="view-panel" data-panel="results">
             <article class="meta-panel">
-              <h3>最近执行结果</h3>
+              <div class="panel-title-row">
+                <h3>最近执行结果</h3>
+                <button id="refreshReports" class="secondary-button" type="button">刷新报告</button>
+              </div>
               <div id="runResults" class="run-results">暂无执行结果</div>
+              <div id="latestReport" class="report-link"></div>
+              <h3 class="section-title">历史报告</h3>
+              <div id="reportList" class="script-list"></div>
             </article>
           </section>
         </section>

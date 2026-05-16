@@ -4,12 +4,14 @@ import { existsSync } from "node:fs";
 import { extname, join, normalize, resolve } from "node:path";
 import { spawn } from "node:child_process";
 import { generateScript } from "./src/generator.mjs";
+import { listReports, writeRunReport } from "./src/report.mjs";
 
 const PORT = Number(process.env.PORT || 5173);
 const HOST = process.env.HOST || "127.0.0.1";
 const ROOT = process.cwd();
 const PUBLIC_DIR = join(ROOT, "public");
 const GENERATED_DIR = join(ROOT, "generated");
+const REPORTS_DIR = join(ROOT, "reports");
 
 const contentTypes = {
   ".html": "text/html; charset=utf-8",
@@ -34,6 +36,15 @@ function safeGeneratedPath(fileName) {
   const fullPath = resolve(GENERATED_DIR, normalized);
   if (!fullPath.startsWith(resolve(GENERATED_DIR))) {
     throw new Error("Invalid generated file path");
+  }
+  return fullPath;
+}
+
+function safeReportPath(fileName) {
+  const normalized = normalize(fileName).replace(/^(\.\.(\/|\\|$))+/, "");
+  const fullPath = resolve(REPORTS_DIR, normalized);
+  if (!fullPath.startsWith(resolve(REPORTS_DIR))) {
+    throw new Error("Invalid report file path");
   }
   return fullPath;
 }
@@ -143,6 +154,10 @@ async function handleApi(req, res) {
     });
   }
 
+  if (req.method === "GET" && req.url === "/api/reports") {
+    return sendJson(res, 200, { reports: await listReports(ROOT) });
+  }
+
   if (req.method === "POST" && req.url === "/api/validate") {
     const body = await readBody(req);
     const fileName = String(body.fileName || "");
@@ -173,14 +188,22 @@ async function handleApi(req, res) {
     const startedAt = Date.now();
     const execution = await runCommand(command, args, ROOT, 45000);
     const durationMs = Date.now() - startedAt;
-
-    return sendJson(res, 200, {
+    const result = {
+      fileName,
+      kind: fileName.includes("api") ? "接口自动化" : "UI 自动化",
       ok: execution.code === 0,
       command: [command, ...args].join(" "),
       durationMs,
+      finishedAt: new Date().toISOString(),
       output:
         execution.output ||
         (execution.code === 0 ? "执行通过" : "执行失败，但没有输出更多信息")
+    };
+    const report = await writeRunReport(ROOT, [result]);
+
+    return sendJson(res, 200, {
+      ...result,
+      report
     });
   }
 
@@ -189,6 +212,22 @@ async function handleApi(req, res) {
 
 async function serveStatic(req, res) {
   const url = new URL(req.url || "/", `http://localhost:${PORT}`);
+  if (url.pathname.startsWith("/reports/")) {
+    const reportName = decodeURIComponent(url.pathname.replace("/reports/", ""));
+    const fullPath = safeReportPath(reportName);
+    try {
+      const content = await readFile(fullPath);
+      res.writeHead(200, {
+        "content-type": contentTypes[extname(fullPath)] || "application/octet-stream"
+      });
+      res.end(content);
+    } catch {
+      res.writeHead(404);
+      res.end("Not found");
+    }
+    return;
+  }
+
   const requestedPath = url.pathname === "/" ? "/index.html" : url.pathname;
   const fullPath = resolve(PUBLIC_DIR, `.${requestedPath}`);
   if (!fullPath.startsWith(resolve(PUBLIC_DIR))) {

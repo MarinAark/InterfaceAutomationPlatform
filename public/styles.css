@@ -259,6 +259,13 @@ textarea {
   padding: 12px;
 }
 
+.panel-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
 .panel-header h3,
 .meta-panel h3 {
   margin-bottom: 0;
@@ -338,6 +345,21 @@ pre {
   border-color: #fca5a5;
   background: #fff1f2;
   color: #991b1b;
+}
+
+.report-link {
+  margin: 12px 0 22px;
+}
+
+.report-link a,
+.report-item {
+  color: #0f766e;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.section-title {
+  margin-top: 18px;
 }
 
 @media (max-width: 980px) {

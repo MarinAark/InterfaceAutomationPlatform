@@ -21,6 +21,9 @@ const assetFileNameEl = document.querySelector("#assetFileName");
 const validateAssetEl = document.querySelector("#validateAsset");
 const runAssetEl = document.querySelector("#runAsset");
 const runResultsEl = document.querySelector("#runResults");
+const latestReportEl = document.querySelector("#latestReport");
+const reportListEl = document.querySelector("#reportList");
+const refreshReportsEl = document.querySelector("#refreshReports");
 
 let currentFileName = "";
 let currentAssetFileName = "";
@@ -78,6 +81,22 @@ function formatExecutionResult(fileName, result) {
   ].join("\n");
 }
 
+function absoluteReportUrl(url) {
+  if (!url) return "";
+  return `${apiBase}${url}`;
+}
+
+function renderLatestReport(report) {
+  latestReportEl.innerHTML = "";
+  if (!report?.htmlUrl) return;
+  const link = document.createElement("a");
+  link.href = absoluteReportUrl(report.htmlUrl);
+  link.target = "_blank";
+  link.rel = "noreferrer";
+  link.textContent = "打开本次可视化报告";
+  latestReportEl.append(link);
+}
+
 function renderAssumptions(items) {
   assumptionsEl.innerHTML = "";
   for (const item of items || []) {
@@ -115,6 +134,29 @@ async function loadScripts() {
   }
 }
 
+async function loadReports() {
+  const { reports } = await requestJson("/api/reports");
+  reportListEl.innerHTML = "";
+  if (!reports.length) {
+    reportListEl.textContent = "暂无报告";
+    return;
+  }
+  for (const report of reports) {
+    const link = document.createElement("a");
+    link.className = "script-item report-item";
+    link.href = absoluteReportUrl(report.url);
+    link.target = "_blank";
+    link.rel = "noreferrer";
+    link.innerHTML = `
+      <div class="script-name"></div>
+      <div class="script-time"></div>
+    `;
+    link.querySelector(".script-name").textContent = report.name;
+    link.querySelector(".script-time").textContent = new Date(report.updatedAt).toLocaleString();
+    reportListEl.append(link);
+  }
+}
+
 async function loadScriptAsset(fileName) {
   const script = await requestJson(`/api/script?fileName=${encodeURIComponent(fileName)}`);
   currentAssetFileName = script.fileName;
@@ -139,6 +181,8 @@ async function runFile(fileName) {
     body: JSON.stringify({ fileName })
   });
   setRunResult(formatExecutionResult(fileName, result), result.ok);
+  renderLatestReport(result.report);
+  await loadReports();
   switchView("results");
   return result;
 }
@@ -244,7 +288,11 @@ validateAssetEl.addEventListener("click", async () => {
 
 refreshScriptsEl.addEventListener("click", loadScripts);
 refreshAssetsEl.addEventListener("click", loadScripts);
+refreshReportsEl.addEventListener("click", loadReports);
 loadScripts().catch(() => {
   scriptsEl.textContent = "脚本列表加载失败";
   assetScriptsEl.textContent = "脚本列表加载失败";
+});
+loadReports().catch(() => {
+  reportListEl.textContent = "报告列表加载失败";
 });
