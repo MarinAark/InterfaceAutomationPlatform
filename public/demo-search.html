@@ -7,100 +7,428 @@
     <style>
       :root {
         font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        background: #f4f6f8;
+        background: #eef2f6;
         color: #17202a;
       }
-      body {
-        margin: 0;
-      }
-      main {
-        max-width: 920px;
-        margin: 0 auto;
-        padding: 56px 20px;
-      }
-      h1 {
-        margin: 0 0 8px;
-        font-size: 32px;
-      }
-      p {
-        margin-top: 0;
-        color: #667085;
-      }
-      form {
+      * { box-sizing: border-box; }
+      body { margin: 0; }
+      button, input, select, textarea { font: inherit; }
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 2;
         display: flex;
-        gap: 10px;
-        margin: 28px 0;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        border-bottom: 1px solid #d8dee8;
+        padding: 14px 28px;
+        background: #ffffff;
       }
-      input {
-        flex: 1;
+      .brand { font-weight: 800; }
+      nav { display: flex; gap: 8px; }
+      nav button, .ghost {
         border: 1px solid #cbd5e1;
         border-radius: 6px;
-        padding: 12px;
-        font: inherit;
+        padding: 8px 12px;
+        background: #ffffff;
+        color: #344054;
+        cursor: pointer;
       }
-      button {
-        border: 0;
-        border-radius: 6px;
-        padding: 0 18px;
-        background: #0f766e;
-        color: #fff;
-        font: inherit;
-        font-weight: 700;
+      nav button.active { border-color: #0f766e; color: #0f766e; background: #ecfdf5; }
+      main {
+        display: grid;
+        grid-template-columns: 260px minmax(0, 1fr);
+        gap: 18px;
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 24px;
       }
-      .results {
+      aside, section.panel, dialog {
         border: 1px solid #d8dee8;
         border-radius: 8px;
-        background: #fff;
-        padding: 18px;
+        background: #ffffff;
       }
-      .result-item {
-        border-top: 1px solid #e5e7eb;
-        padding-top: 14px;
-        margin-top: 14px;
+      aside { padding: 16px; align-self: start; }
+      h1, h2, h3, p { margin-top: 0; }
+      h1 { margin-bottom: 6px; font-size: 28px; }
+      h2 { margin-bottom: 12px; font-size: 18px; }
+      .muted { color: #667085; }
+      .filters { display: grid; gap: 12px; }
+      label { display: grid; gap: 6px; color: #344054; font-size: 14px; font-weight: 650; }
+      input, select, textarea {
+        width: 100%;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        padding: 10px 12px;
+        background: #ffffff;
+        color: #17202a;
       }
-      .result-item:first-child {
-        border-top: 0;
-        margin-top: 0;
-        padding-top: 0;
+      input[type="checkbox"], input[type="radio"] { width: auto; }
+      .check-row, .radio-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500;
       }
-      .result-item h2 {
-        margin: 0 0 6px;
-        font-size: 18px;
+      .content { display: grid; gap: 18px; }
+      .panel { padding: 18px; }
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 220px;
+        gap: 16px;
+        align-items: center;
+      }
+      .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .metric {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 14px;
+        background: #fbfcfe;
+      }
+      .metric span { color: #667085; font-size: 12px; }
+      .metric strong { display: block; margin-top: 6px; font-size: 24px; }
+      .search-row { display: grid; grid-template-columns: minmax(0, 1fr) 150px 120px; gap: 10px; }
+      .primary {
+        border: 0;
+        border-radius: 6px;
+        padding: 10px 16px;
+        background: #0f766e;
+        color: #ffffff;
+        font-weight: 800;
+        cursor: pointer;
+      }
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+      }
+      .tabs { display: flex; gap: 8px; border-bottom: 1px solid #e5e7eb; margin-bottom: 14px; }
+      .tab {
+        border: 0;
+        border-bottom: 2px solid transparent;
+        padding: 10px 12px;
+        background: transparent;
+        color: #667085;
+        cursor: pointer;
+      }
+      .tab.active { border-color: #0f766e; color: #0f766e; font-weight: 800; }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th, td {
+        border-bottom: 1px solid #e5e7eb;
+        padding: 11px 10px;
+        text-align: left;
+      }
+      th { color: #667085; font-size: 12px; }
+      .tag {
+        display: inline-flex;
+        border-radius: 999px;
+        padding: 4px 8px;
+        background: #e0f2fe;
+        color: #075985;
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .tag.pass { background: #dcfce7; color: #166534; }
+      .tag.warn { background: #fef3c7; color: #92400e; }
+      .split { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+      .slider-value { font-weight: 800; color: #0f766e; }
+      .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+      .card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px; background: #fbfcfe; }
+      .card h3 { margin-bottom: 8px; font-size: 16px; }
+      .toast {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        display: none;
+        border-radius: 8px;
+        padding: 12px 14px;
+        background: #111827;
+        color: #ffffff;
+      }
+      .toast.show { display: block; }
+      dialog { width: min(560px, calc(100vw - 32px)); padding: 0; }
+      dialog::backdrop { background: rgb(15 23 42 / 0.45); }
+      .modal-head, .modal-body, .modal-foot { padding: 16px; }
+      .modal-head { border-bottom: 1px solid #e5e7eb; }
+      .modal-foot { display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid #e5e7eb; }
+      .hidden { display: none; }
+      @media (max-width: 920px) {
+        main, .hero, .split, .cards, .metric-grid, .search-row { grid-template-columns: 1fr; }
+        header { align-items: flex-start; flex-direction: column; }
       }
     </style>
   </head>
   <body>
-    <main>
-      <h1>Demo Search</h1>
-      <p>本地稳定搜索页，用于验证 UI 自动化生成、执行和报告链路。</p>
-      <form id="searchForm">
-        <input id="searchBox" name="q" type="search" placeholder="输入关键词" autocomplete="off" />
-        <button id="searchButton" type="submit">搜索</button>
-      </form>
-      <section id="results" class="results" aria-live="polite">
-        <p>等待搜索</p>
-      </section>
-    </main>
-    <script>
-      const form = document.querySelector("#searchForm");
-      const input = document.querySelector("#searchBox");
-      const results = document.querySelector("#results");
+    <header>
+      <div>
+        <div class="brand">Demo QA Console</div>
+        <p class="muted">稳定的本地 UI 自动化演示站点</p>
+      </div>
+      <nav aria-label="主导航">
+        <button class="active" type="button" data-nav="dashboard">仪表盘</button>
+        <button type="button" data-nav="cases">用例</button>
+        <button type="button" data-nav="settings">设置</button>
+      </nav>
+    </header>
 
-      form.addEventListener("submit", (event) => {
+    <main>
+      <aside>
+        <h2>筛选器</h2>
+        <form id="filterForm" class="filters">
+          <label>
+            项目
+            <select id="projectSelect">
+              <option>自动化平台</option>
+              <option>订单中心</option>
+              <option>用户系统</option>
+            </select>
+          </label>
+          <label>
+            优先级
+            <select id="prioritySelect">
+              <option value="all">全部</option>
+              <option value="P0">P0</option>
+              <option value="P1">P1</option>
+              <option value="P2">P2</option>
+            </select>
+          </label>
+          <label class="check-row">
+            <input id="onlyFailed" type="checkbox" />
+            只看失败
+          </label>
+          <label class="check-row">
+            <input id="includeApi" type="checkbox" checked />
+            包含接口用例
+          </label>
+          <label>
+            最小通过率 <span id="coverageValue" class="slider-value">80%</span>
+            <input id="coverageSlider" type="range" min="0" max="100" value="80" />
+          </label>
+          <button id="applyFilters" class="primary" type="submit">应用筛选</button>
+        </form>
+      </aside>
+
+      <div class="content">
+        <section class="panel hero">
+          <div>
+            <h1>自动化测试工作台</h1>
+            <p class="muted">这个页面覆盖搜索、表单、表格、标签页、弹窗、开关、滑块、单选、复选和通知等常见 UI 元素。</p>
+            <form id="searchForm" class="search-row">
+              <input id="searchBox" name="q" type="search" placeholder="输入关键词" autocomplete="off" />
+              <select id="typeSelect" name="type">
+                <option value="all">全部类型</option>
+                <option value="ui">UI 自动化</option>
+                <option value="api">接口自动化</option>
+              </select>
+              <button id="searchButton" class="primary" type="submit">搜索</button>
+            </form>
+            <div class="toolbar">
+              <button id="openCreateModal" class="ghost" type="button">新建用例</button>
+              <button id="exportButton" class="ghost" type="button">导出报告</button>
+              <button id="resetButton" class="ghost" type="button">重置</button>
+            </div>
+          </div>
+          <div class="metric">
+            <span>当前状态</span>
+            <strong id="statusText">待搜索</strong>
+          </div>
+        </section>
+
+        <section class="metric-grid">
+          <div class="metric"><span>用例总数</span><strong id="totalCases">24</strong></div>
+          <div class="metric"><span>通过率</span><strong id="passRate">92%</strong></div>
+          <div class="metric"><span>平均耗时</span><strong id="avgTime">1.8s</strong></div>
+          <div class="metric"><span>失败数</span><strong id="failedCount">2</strong></div>
+        </section>
+
+        <section class="panel">
+          <div class="tabs" role="tablist">
+            <button class="tab active" type="button" data-tab="results">搜索结果</button>
+            <button class="tab" type="button" data-tab="details">执行详情</button>
+            <button class="tab" type="button" data-tab="history">历史记录</button>
+          </div>
+          <div id="resultsTab" class="tab-panel">
+            <div id="results" aria-live="polite">
+              <p class="muted">等待搜索</p>
+            </div>
+            <table aria-label="用例列表">
+              <thead>
+                <tr>
+                  <th><input id="selectAll" type="checkbox" /></th>
+                  <th>用例名称</th>
+                  <th>类型</th>
+                  <th>优先级</th>
+                  <th>状态</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="caseTable">
+                <tr>
+                  <td><input class="case-check" type="checkbox" /></td>
+                  <td>本地搜索流程</td>
+                  <td>UI</td>
+                  <td>P0</td>
+                  <td><span class="tag pass">通过</span></td>
+                  <td><button class="ghost row-action" type="button">查看</button></td>
+                </tr>
+                <tr>
+                  <td><input class="case-check" type="checkbox" /></td>
+                  <td>报告生成校验</td>
+                  <td>UI</td>
+                  <td>P1</td>
+                  <td><span class="tag pass">通过</span></td>
+                  <td><button class="ghost row-action" type="button">查看</button></td>
+                </tr>
+                <tr>
+                  <td><input class="case-check" type="checkbox" /></td>
+                  <td>接口状态码校验</td>
+                  <td>API</td>
+                  <td>P1</td>
+                  <td><span class="tag warn">待修复</span></td>
+                  <td><button class="ghost row-action" type="button">查看</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div id="detailsTab" class="tab-panel hidden">
+            <div class="split">
+              <label>
+                执行备注
+                <textarea id="noteText" rows="5">覆盖核心页面元素。</textarea>
+              </label>
+              <div>
+                <h3>执行模式</h3>
+                <label class="radio-row"><input type="radio" name="runMode" value="smoke" checked /> 冒烟测试</label>
+                <label class="radio-row"><input type="radio" name="runMode" value="regression" /> 回归测试</label>
+                <label class="radio-row"><input type="radio" name="runMode" value="full" /> 全量测试</label>
+              </div>
+            </div>
+          </div>
+          <div id="historyTab" class="tab-panel hidden">
+            <div class="cards">
+              <article class="card"><h3>今日构建</h3><p>3 次执行，全部完成。</p></article>
+              <article class="card"><h3>最新报告</h3><p>已生成截图和命令输出。</p></article>
+              <article class="card"><h3>质量门禁</h3><p>通过率不低于 80%。</p></article>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <dialog id="caseDialog">
+      <div class="modal-head"><h2>新建用例</h2></div>
+      <form id="caseForm" method="dialog">
+        <div class="modal-body">
+          <label>
+            用例名称
+            <input id="caseName" required value="本地可视化巡检" />
+          </label>
+          <label>
+            负责人
+            <input id="ownerName" value="QA Bot" />
+          </label>
+          <label>
+            描述
+            <textarea id="caseDescription" rows="4">遍历常见页面控件并生成截图报告。</textarea>
+          </label>
+        </div>
+        <div class="modal-foot">
+          <button id="cancelModal" class="ghost" value="cancel" type="submit">取消</button>
+          <button id="saveCase" class="primary" value="save" type="submit">保存</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div id="toast" class="toast" role="status">操作成功</div>
+
+    <script>
+      const searchForm = document.querySelector("#searchForm");
+      const searchBox = document.querySelector("#searchBox");
+      const results = document.querySelector("#results");
+      const statusText = document.querySelector("#statusText");
+      const coverageSlider = document.querySelector("#coverageSlider");
+      const coverageValue = document.querySelector("#coverageValue");
+      const tabs = document.querySelectorAll(".tab");
+      const tabPanels = {
+        results: document.querySelector("#resultsTab"),
+        details: document.querySelector("#detailsTab"),
+        history: document.querySelector("#historyTab")
+      };
+      const selectAll = document.querySelector("#selectAll");
+      const caseChecks = document.querySelectorAll(".case-check");
+      const dialog = document.querySelector("#caseDialog");
+      const toast = document.querySelector("#toast");
+
+      function showToast(message) {
+        toast.textContent = message;
+        toast.classList.add("show");
+        window.setTimeout(() => toast.classList.remove("show"), 1200);
+      }
+
+      searchForm.addEventListener("submit", (event) => {
         event.preventDefault();
-        const keyword = input.value.trim() || "自动化测试";
+        const keyword = searchBox.value.trim() || "自动化测试";
         document.title = `${keyword} - Demo Search`;
+        statusText.textContent = "已搜索";
         results.innerHTML = `
-          <article class="result-item">
-            <h2>${keyword} 测试结果</h2>
+          <article class="card">
+            <h3>${keyword} 测试结果</h3>
             <p>已找到与 ${keyword} 相关的自动化测试用例、执行报告和质量门禁。</p>
           </article>
-          <article class="result-item">
-            <h2>${keyword} 可视化报告</h2>
-            <p>执行过程截图、命令输出和失败原因会统一展示在报告中。</p>
-          </article>
         `;
+        showToast("搜索完成");
       });
+
+      coverageSlider.addEventListener("input", () => {
+        coverageValue.textContent = `${coverageSlider.value}%`;
+      });
+
+      document.querySelector("#filterForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        statusText.textContent = "已筛选";
+        showToast("筛选已应用");
+      });
+
+      for (const tab of tabs) {
+        tab.addEventListener("click", () => {
+          for (const item of tabs) item.classList.toggle("active", item === tab);
+          for (const [name, panel] of Object.entries(tabPanels)) {
+            panel.classList.toggle("hidden", name !== tab.dataset.tab);
+          }
+        });
+      }
+
+      selectAll.addEventListener("change", () => {
+        for (const item of caseChecks) item.checked = selectAll.checked;
+        showToast(selectAll.checked ? "已全选" : "已取消选择");
+      });
+
+      document.querySelector("#openCreateModal").addEventListener("click", () => dialog.showModal());
+      document.querySelector("#caseForm").addEventListener("submit", (event) => {
+        if (event.submitter?.value === "save") {
+          showToast("用例已保存");
+          statusText.textContent = "已保存";
+        }
+      });
+      document.querySelector("#exportButton").addEventListener("click", () => showToast("报告已导出"));
+      document.querySelector("#resetButton").addEventListener("click", () => {
+        searchBox.value = "";
+        statusText.textContent = "已重置";
+        results.innerHTML = '<p class="muted">等待搜索</p>';
+        showToast("页面已重置");
+      });
+      for (const button of document.querySelectorAll(".row-action")) {
+        button.addEventListener("click", () => showToast("已查看用例详情"));
+      }
     </script>
   </body>
 </html>
