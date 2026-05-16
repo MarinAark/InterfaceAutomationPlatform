@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>自动化测试生成平台</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <section class="workspace">
+        <aside class="sidebar">
+          <div>
+            <p class="eyebrow">AutoTest Studio</p>
+            <h1>自动化测试生成平台</h1>
+          </div>
+          <nav class="nav">
+            <button class="nav-item active" type="button" data-view="generate">生成脚本</button>
+            <button class="nav-item" type="button" data-view="assets">脚本资产</button>
+            <button class="nav-item" type="button" data-view="results">执行结果</button>
+          </nav>
+          <div class="status-panel">
+            <span class="status-dot"></span>
+            <span>本地规则引擎可用</span>
+          </div>
+        </aside>
+
+        <section class="main-panel">
+          <header class="topbar">
+            <div>
+              <h2 id="pageTitle">需求转自动化脚本</h2>
+              <p id="pageDescription">输入自然语言需求，生成 UI 自动化或接口自动化测试脚本。</p>
+            </div>
+            <button id="refreshScripts" class="icon-button" type="button" title="刷新脚本列表">↻</button>
+          </header>
+
+          <section class="view-panel active" data-panel="generate">
+            <section class="composer">
+              <label for="requirement">测试需求</label>
+              <textarea id="requirement" rows="5">帮我写一个百度搜索“自动化测试”的UI自动化测试脚本</textarea>
+
+              <div class="controls">
+                <label>
+                  类型
+                  <select id="kind">
+                    <option value="auto">自动识别</option>
+                    <option value="ui">UI 自动化</option>
+                    <option value="api">接口自动化</option>
+                  </select>
+                </label>
+                <label>
+                  语言
+                  <select id="language">
+                    <option value="python">Python / Pytest</option>
+                    <option value="javascript">JavaScript</option>
+                  </select>
+                </label>
+                <button id="generate" class="primary-button" type="button">生成脚本</button>
+              </div>
+            </section>
+
+            <section class="result-grid">
+              <article class="script-panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Generated Script</p>
+                    <h3 id="fileName">等待生成</h3>
+                  </div>
+                  <div class="button-row">
+                    <button id="runScript" class="primary-button" type="button" disabled>执行脚本</button>
+                    <button id="validate" class="secondary-button" type="button" disabled>语法检查</button>
+                  </div>
+                </div>
+                <pre><code id="code">// 生成结果会显示在这里</code></pre>
+              </article>
+
+              <aside class="meta-panel">
+                <h3>识别结果</h3>
+                <ul id="assumptions"></ul>
+                <h3>脚本资产</h3>
+                <div id="scripts" class="script-list"></div>
+              </aside>
+            </section>
+          </section>
+
+          <section class="view-panel" data-panel="assets">
+            <section class="asset-layout">
+              <aside class="asset-browser">
+                <div class="panel-header compact">
+                  <h3>脚本文件</h3>
+                  <button id="refreshAssets" class="secondary-button" type="button">刷新</button>
+                </div>
+                <div id="assetScripts" class="script-list"></div>
+              </aside>
+              <article class="script-panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Script Asset</p>
+                    <h3 id="assetFileName">选择一个脚本</h3>
+                  </div>
+                  <div class="button-row">
+                    <button id="runAsset" class="primary-button" type="button" disabled>执行脚本</button>
+                    <button id="validateAsset" class="secondary-button" type="button" disabled>语法检查</button>
+                  </div>
+                </div>
+                <pre><code id="assetCode">// 点击左侧脚本查看内容</code></pre>
+              </article>
+            </section>
+          </section>
+
+          <section class="view-panel" data-panel="results">
+            <article class="meta-panel">
+              <h3>最近执行结果</h3>
+              <div id="runResults" class="run-results">暂无执行结果</div>
+            </article>
+          </section>
+        </section>
+      </section>
+    </main>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
