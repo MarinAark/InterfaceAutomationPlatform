@@ -46,6 +46,7 @@ function getRunCommand(fileName, filePath) {
 }
 
 async function listScripts() {
+  const pattern = process.env.TEST_PATTERN ? new RegExp(process.env.TEST_PATTERN) : null;
   const files = await readdir(GENERATED_DIR);
   const scripts = [];
   for (const file of files) {
@@ -54,6 +55,7 @@ async function listScripts() {
     const info = await stat(filePath);
     if (!info.isFile()) continue;
     if (!/\.(py|js)$/.test(file)) continue;
+    if (pattern && !pattern.test(file)) continue;
     scripts.push({ fileName: file, filePath });
   }
   return scripts.sort((a, b) => a.fileName.localeCompare(b.fileName));

@@ -16,13 +16,46 @@ function statusLabel(ok) {
   return ok ? "通过" : "失败";
 }
 
+function screenshotsFromOutput(output) {
+  return String(output || "")
+    .split(/\r?\n/)
+    .map((line) => line.match(/^SCREENSHOT:\s*(.+)$/)?.[1]?.trim())
+    .filter(Boolean)
+    .map((filePath) => {
+      const reportIndex = filePath.indexOf("reports/");
+      const url = reportIndex >= 0 ? `/${filePath.slice(reportIndex)}` : filePath;
+      return { filePath, url };
+    });
+}
+
 function buildHtmlReport(report) {
   const passed = report.results.filter((item) => item.ok).length;
   const failed = report.results.length - passed;
   const passRate = report.results.length ? Math.round((passed / report.results.length) * 100) : 0;
   const rows = report.results
-    .map(
-      (item) => `
+    .map((item) => {
+      const screenshots = [...(item.screenshots || []), ...screenshotsFromOutput(item.output)];
+      const uniqueScreenshots = screenshots.filter(
+        (shot, index, all) => all.findIndex((candidate) => candidate.url === shot.url) === index
+      );
+      const gallery = uniqueScreenshots.length
+        ? `<section class="gallery">
+            <h3>执行过程截图</h3>
+            <div class="shots">
+              ${uniqueScreenshots
+                .map(
+                  (shot, index) => `
+                    <figure>
+                      <img src="${escapeHtml(shot.url)}" alt="步骤截图 ${index + 1}" />
+                      <figcaption>步骤 ${index + 1}</figcaption>
+                    </figure>
+                  `
+                )
+                .join("")}
+            </div>
+          </section>`
+        : "";
+      return `
         <article class="case ${item.ok ? "passed" : "failed"}">
           <div class="case-head">
             <div>
@@ -36,10 +69,11 @@ function buildHtmlReport(report) {
             <div><dt>耗时</dt><dd>${escapeHtml(item.durationMs)} ms</dd></div>
             <div><dt>结束时间</dt><dd>${escapeHtml(item.finishedAt)}</dd></div>
           </dl>
+          ${gallery}
           <pre>${escapeHtml(item.output || "无输出")}</pre>
         </article>
-      `
-    )
+      `;
+    })
     .join("");
 
   return `<!doctype html>
@@ -71,8 +105,14 @@ function buildHtmlReport(report) {
       dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0; padding: 14px 16px; }
       dt { color: #667085; font-size: 12px; }
       dd { margin: 4px 0 0; word-break: break-all; }
+      .gallery { padding: 0 16px 16px; }
+      .gallery h3 { margin: 4px 0 12px; font-size: 15px; }
+      .shots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+      figure { margin: 0; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; background: #f8fafc; }
+      img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: top left; }
+      figcaption { padding: 8px 10px; color: #667085; font-size: 12px; }
       pre { margin: 0; padding: 16px; overflow: auto; background: #0b1020; color: #dbeafe; font-size: 12px; line-height: 1.55; }
-      @media (max-width: 760px) { header, .summary, dl { grid-template-columns: 1fr; display: grid; } }
+      @media (max-width: 760px) { header, .summary, dl, .shots { grid-template-columns: 1fr; display: grid; } }
     </style>
   </head>
   <body>

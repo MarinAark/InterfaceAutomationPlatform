@@ -44,6 +44,15 @@ function inferTarget(requirement, kind) {
       titlePattern: "百度"
     };
   }
+  if (/本地|示例|demo|可跑通|稳定/i.test(requirement)) {
+    return {
+      url: url || "http://127.0.0.1:5173/demo-search.html",
+      siteName: "本地示例",
+      searchSelector: "#searchBox:visible",
+      searchUrlTemplate: "",
+      titlePattern: "Demo Search"
+    };
+  }
   if (/谷歌|google/i.test(requirement)) {
     return {
       url: url || "https://www.google.com",
@@ -79,6 +88,7 @@ function makePythonUi({ requirement, target, keyword }) {
   const fallbackUrl = target.searchUrlTemplate
     ? target.searchUrlTemplate.replace("{keyword}", encodeURIComponent(keyword))
     : "";
+  const slug = slugify(requirement);
   return `"""
 Generated from requirement:
 ${requirement}
@@ -91,7 +101,18 @@ Run:
   python ${slugify(requirement)}.py
 """
 import re
+from pathlib import Path
 from playwright.sync_api import expect, sync_playwright
+
+
+ARTIFACT_DIR = Path("reports/assets")
+
+
+def capture(page, name):
+    ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)
+    path = ARTIFACT_DIR / f"${slug}_{name}.png"
+    page.screenshot(path=str(path), full_page=True)
+    print(f"SCREENSHOT: {path}")
 
 
 def main():
@@ -100,14 +121,17 @@ def main():
         page = browser.new_page()
         page.set_viewport_size({"width": 1366, "height": 768})
         page.goto(${pyString(target.url)}, wait_until="domcontentloaded")
+        capture(page, "01_open")
         search_box = page.locator(${pyString(target.searchSelector)}).first
         try:
             search_box.wait_for(state="visible", timeout=5000)
             search_box.fill(${pyString(keyword)})
+            capture(page, "02_input")
             page.keyboard.press("Enter")
         except Exception:
             page.goto(${pyString(fallbackUrl || target.url)}, wait_until="domcontentloaded")
         page.wait_for_load_state("domcontentloaded")
+        capture(page, "03_result")
         body_text = page.locator("body").inner_text(timeout=5000)
         if re.search("安全验证|验证码|captcha|unusual traffic", body_text, re.IGNORECASE):
             raise AssertionError("${target.siteName} 触发了反自动化验证，请换用测试环境、降低访问频率，或使用已授权的测试账号/白名单网络。")
@@ -127,6 +151,7 @@ function makeJsUi({ requirement, target, keyword }) {
   const fallbackUrl = target.searchUrlTemplate
     ? target.searchUrlTemplate.replace("{keyword}", encodeURIComponent(keyword))
     : "";
+  const slug = slugify(requirement);
   return `/**
  * Generated from requirement:
  * ${requirement}
@@ -139,19 +164,32 @@ function makeJsUi({ requirement, target, keyword }) {
  *   npx playwright test ${slugify(requirement)}.spec.js
  */
 import { test, expect } from "@playwright/test";
+import { mkdir } from "node:fs/promises";
+
+const artifactDir = "reports/assets";
+
+async function capture(page, name) {
+  await mkdir(artifactDir, { recursive: true });
+  const path = \`\${artifactDir}/${slug}_\${name}.png\`;
+  await page.screenshot({ path, fullPage: true });
+  console.log(\`SCREENSHOT: \${path}\`);
+}
 
 test("${target.siteName} 搜索自动化", async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
   await page.goto(${jsString(target.url)});
+  await capture(page, "01_open");
   const searchBox = page.locator(${jsString(target.searchSelector)}).first();
   try {
     await searchBox.waitFor({ state: "visible", timeout: 5000 });
     await searchBox.fill(${jsString(keyword)});
+    await capture(page, "02_input");
     await page.keyboard.press("Enter");
   } catch {
     await page.goto(${jsString(fallbackUrl || target.url)});
   }
   await page.waitForLoadState("domcontentloaded");
+  await capture(page, "03_result");
   const bodyText = await page.locator("body").innerText({ timeout: 5000 });
   if (/安全验证|验证码|captcha|unusual traffic/i.test(bodyText)) {
     throw new Error("${target.siteName} 触发了反自动化验证，请换用测试环境、降低访问频率，或使用已授权的测试账号/白名单网络。");

@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Demo Search</title>
+    <style>
+      :root {
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #f4f6f8;
+        color: #17202a;
+      }
+      body {
+        margin: 0;
+      }
+      main {
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 56px 20px;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 32px;
+      }
+      p {
+        margin-top: 0;
+        color: #667085;
+      }
+      form {
+        display: flex;
+        gap: 10px;
+        margin: 28px 0;
+      }
+      input {
+        flex: 1;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        padding: 12px;
+        font: inherit;
+      }
+      button {
+        border: 0;
+        border-radius: 6px;
+        padding: 0 18px;
+        background: #0f766e;
+        color: #fff;
+        font: inherit;
+        font-weight: 700;
+      }
+      .results {
+        border: 1px solid #d8dee8;
+        border-radius: 8px;
+        background: #fff;
+        padding: 18px;
+      }
+      .result-item {
+        border-top: 1px solid #e5e7eb;
+        padding-top: 14px;
+        margin-top: 14px;
+      }
+      .result-item:first-child {
+        border-top: 0;
+        margin-top: 0;
+        padding-top: 0;
+      }
+      .result-item h2 {
+        margin: 0 0 6px;
+        font-size: 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Demo Search</h1>
+      <p>本地稳定搜索页，用于验证 UI 自动化生成、执行和报告链路。</p>
+      <form id="searchForm">
+        <input id="searchBox" name="q" type="search" placeholder="输入关键词" autocomplete="off" />
+        <button id="searchButton" type="submit">搜索</button>
+      </form>
+      <section id="results" class="results" aria-live="polite">
+        <p>等待搜索</p>
+      </section>
+    </main>
+    <script>
+      const form = document.querySelector("#searchForm");
+      const input = document.querySelector("#searchBox");
+      const results = document.querySelector("#results");
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const keyword = input.value.trim() || "自动化测试";
+        document.title = `${keyword} - Demo Search`;
+        results.innerHTML = `
+          <article class="result-item">
+            <h2>${keyword} 测试结果</h2>
+            <p>已找到与 ${keyword} 相关的自动化测试用例、执行报告和质量门禁。</p>
+          </article>
+          <article class="result-item">
+            <h2>${keyword} 可视化报告</h2>
+            <p>执行过程截图、命令输出和失败原因会统一展示在报告中。</p>
+          </article>
+        `;
+      });
+    </script>
+  </body>
+</html>

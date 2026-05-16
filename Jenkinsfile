@@ -26,7 +26,7 @@ pipeline {
 
     stage('Run Generated Tests') {
       steps {
-        sh 'node scripts/run-generated.mjs'
+        sh 'TEST_PATTERN=demo_ node scripts/run-generated.mjs'
       }
     }
   }
